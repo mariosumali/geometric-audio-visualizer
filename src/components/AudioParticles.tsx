@@ -22,14 +22,16 @@ interface Particle {
     amplitude: number;
 }
 
-// Frequency band colors (2kHz to 8kHz+)
+// Frequency band colors (more vibrant, saturated palette)
 const FREQUENCY_COLORS = [
-    new THREE.Color(0x4a9eff), // Low - Blue
-    new THREE.Color(0x00d4aa), // Mid-low - Cyan
-    new THREE.Color(0x4ade80), // Mid - Green
-    new THREE.Color(0xfbbf24), // Mid-high - Yellow
-    new THREE.Color(0xf97316), // High - Orange
-    new THREE.Color(0xef4444), // Ultra - Red
+    new THREE.Color(0x0066ff), // Low - Deep Blue
+    new THREE.Color(0x00ffcc), // Mid-low - Bright Cyan
+    new THREE.Color(0x00ff44), // Mid - Vivid Green
+    new THREE.Color(0xffee00), // Mid-high - Bright Yellow
+    new THREE.Color(0xff6600), // High - Vivid Orange
+    new THREE.Color(0xff0055), // Ultra - Hot Pink/Red
+    new THREE.Color(0xcc00ff), // Extra - Purple
+    new THREE.Color(0xff00ff), // Extra - Magenta
 ];
 
 export const AudioParticles: React.FC<AudioParticlesProps> = ({
@@ -104,42 +106,46 @@ export const AudioParticles: React.FC<AudioParticlesProps> = ({
     ): THREE.Vector3 => {
         const pos = new THREE.Vector3();
         const t = time + index * 0.1;
-        const amp = amplitude * 3;
+        const amp = amplitude * 5; // Exaggerated amplitude effect
+
+        // Y-axis directly maps to frequency (like reference: 0 KHz at bottom, 4.5 KHz at top)
+        const frequencyHeight = (frequencyBand / 7) * 8 - 2; // Maps to roughly -2 to 6 range
 
         switch (patternType) {
             case 'spiral': {
                 const angle = t * 2 + index * 0.3;
-                const radius = 2 + amp + (index % 10) * 0.2;
-                const height = (frequencyBand - 2.5) * 2;
+                const radius = 3 + amp * 1.5 + (index % 10) * 0.3;
                 pos.set(
                     Math.cos(angle) * radius,
-                    height + Math.sin(t * 3) * amp * 0.5,
+                    frequencyHeight + Math.sin(t * 3) * amp * 0.3,
                     Math.sin(angle) * radius
                 );
                 break;
             }
             case 'wave': {
-                const x = (index % 20 - 10) * 0.5;
-                const z = (Math.floor(index / 20) % 20 - 10) * 0.5;
-                const y = Math.sin(x * 0.5 + t * 2) * amp +
-                    Math.cos(z * 0.5 + t * 1.5) * amp * 0.5 +
-                    (frequencyBand - 2.5) * 0.5;
+                const x = (index % 25 - 12.5) * 0.6;
+                const z = (Math.floor(index / 25) % 25 - 12.5) * 0.6;
+                const y = frequencyHeight + Math.sin(x * 0.5 + t * 2) * amp * 0.3 +
+                    Math.cos(z * 0.5 + t * 1.5) * amp * 0.2;
                 pos.set(x, y, z);
                 break;
             }
             case 'scatter': {
-                const phi = Math.acos(-1 + (2 * index) / particleCount);
-                const theta = Math.sqrt(particleCount * Math.PI) * phi + t;
-                const radius = 3 + amp * 2 + frequencyBand * 0.3;
-                pos.setFromSpherical(new THREE.Spherical(radius, phi, theta));
-                pos.y += Math.sin(t * 2 + index * 0.1) * amp * 0.3;
+                // Scatter with frequency-based Y positioning (like reference image)
+                const spreadX = (Math.random() - 0.5) * 12 + Math.sin(t + index) * 2;
+                const spreadZ = (Math.random() - 0.5) * 12 + Math.cos(t + index) * 2;
+                pos.set(
+                    spreadX,
+                    frequencyHeight + amp * 0.5 * Math.sin(t * 2 + index * 0.1),
+                    spreadZ
+                );
                 break;
             }
             case 'sphere': {
                 const phi = Math.acos(-1 + (2 * (index + t * 10)) / particleCount);
                 const theta = Math.sqrt(particleCount * Math.PI) * phi;
-                const baseRadius = 2 + frequencyBand * 0.5;
-                const radius = baseRadius + amp * 1.5 * Math.sin(t * 3 + index * 0.2);
+                const baseRadius = 3 + frequencyBand * 0.8;
+                const radius = baseRadius + amp * 2 * Math.sin(t * 3 + index * 0.2);
                 pos.setFromSpherical(new THREE.Spherical(radius, phi, theta));
                 break;
             }
@@ -186,7 +192,7 @@ export const AudioParticles: React.FC<AudioParticlesProps> = ({
                     deadParticle.emissionTime = currentTime;
                     deadParticle.frequencyBand = dominantBand;
                     deadParticle.amplitude = amplitude;
-                    deadParticle.color.copy(FREQUENCY_COLORS[dominantBand]);
+                    deadParticle.color.copy(FREQUENCY_COLORS[dominantBand % FREQUENCY_COLORS.length]);
                     deadParticle.size = (0.05 + amplitude * 0.15) * 20;
 
                     const idx = particlesRef.current.indexOf(deadParticle);
@@ -244,31 +250,29 @@ export const AudioParticles: React.FC<AudioParticlesProps> = ({
         colorAttr.needsUpdate = true;
         sizeAttr.needsUpdate = true;
 
-        // Update connection lines
+        // Update connection lines - connect each particle to its previous and next neighbor only
         if (showConnections && linesRef.current && activeParticles.length > 1) {
             const lineGeom = linesRef.current.geometry;
             const linePos = lineGeom.attributes.position as THREE.BufferAttribute;
 
             let lineIndex = 0;
-            const maxDistance = 2.5;
 
-            for (let i = 0; i < activeParticles.length && lineIndex < particleCount * 3; i++) {
-                for (let j = i + 1; j < activeParticles.length && lineIndex < particleCount * 3; j++) {
-                    const dist = activeParticles[i].position.distanceTo(activeParticles[j].position);
-                    if (dist < maxDistance) {
-                        linePos.setXYZ(lineIndex * 2,
-                            activeParticles[i].position.x,
-                            activeParticles[i].position.y,
-                            activeParticles[i].position.z
-                        );
-                        linePos.setXYZ(lineIndex * 2 + 1,
-                            activeParticles[j].position.x,
-                            activeParticles[j].position.y,
-                            activeParticles[j].position.z
-                        );
-                        lineIndex++;
-                    }
-                }
+            // Connect sequential particles (chain-like connections)
+            for (let i = 0; i < activeParticles.length - 1 && lineIndex < particleCount * 3; i++) {
+                const current = activeParticles[i];
+                const next = activeParticles[i + 1];
+
+                linePos.setXYZ(lineIndex * 2,
+                    current.position.x,
+                    current.position.y,
+                    current.position.z
+                );
+                linePos.setXYZ(lineIndex * 2 + 1,
+                    next.position.x,
+                    next.position.y,
+                    next.position.z
+                );
+                lineIndex++;
             }
 
             // Clear remaining lines
