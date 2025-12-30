@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Geometric Audio Visualizer</title>
+  <meta name="description"
+    content="Real-time geometric audio visualization with spectral analysis and 3D acoustic manifolds" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+  <div id="app">
+    <!-- Upload Section -->
+    <div id="upload-section">
+      <div id="dropzone">
+        <div class="dropzone-content">
+          <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 16V4m0 0L8 8m4-4l4 4" />
+            <path d="M3 15v4a2 2 0 002 2h14a2 2 0 002-2v-4" />
+          </svg>
+          <h2>Drop Audio or Video File</h2>
+          <p>Supports MP3, WAV, OGG, MP4, WEBM</p>
+          <button id="browse-btn">Browse Files</button>
+        </div>
+        <input type="file" id="file-input" accept="audio/*,video/*" hidden />
+      </div>
+    </div>
+
+    <!-- Main Visualizer -->
+    <div id="visualizer" class="hidden">
+      <!-- Panel Grid - Resizable Layout -->
+      <div id="panel-grid">
+        <!-- Left Column (3 panels stacked) -->
+        <div class="left-column" id="left-column">
+          <div class="panel resizable" id="tone-map-panel">
+            <div class="panel-header">
+              <span class="panel-title">TONE MAP</span>
+              <span class="panel-subtitle">SPECTRAL FLUX</span>
+            </div>
+            <canvas id="tone-map-canvas"></canvas>
+            <div class="resize-handle resize-bottom"></div>
+          </div>
+
+          <div class="panel resizable" id="pitch-map-panel">
+            <div class="panel-header">
+              <span class="panel-title">PITCH MAP</span>
+              <div class="pitch-legend">
+                <span class="legend-item cyan">■ SPECTRAL CENTROID</span>
+                <span class="legend-item green">■ CENTROID PITCH (F₀)</span>
+                <span class="legend-item pink">■ CENTROID FLUX</span>
+              </div>
+            </div>
+            <canvas id="pitch-map-canvas"></canvas>
+            <div class="resize-handle resize-bottom"></div>
+          </div>
+
+          <div class="panel resizable" id="vocal-signature-panel">
+            <div class="panel-header">
+              <span class="panel-title">VOCAL SIGNATURE</span>
+            </div>
+            <canvas id="vocal-signature-canvas"></canvas>
+          </div>
+
+          <!-- Resize handle for column width -->
+          <div class="resize-handle resize-right" id="column-resize"></div>
+        </div>
+
+        <!-- Center/Right Section -->
+        <div class="center-section">
+          <!-- Main Manifold Panel (spans most of upper area) -->
+          <div class="panel manifold-wrapper" id="manifold-panel">
+            <div class="manifold-header">
+              <span class="panel-title">SPATIOTEMPORAL ACOUSTIC MANIFOLD</span>
+              <span class="panel-subtitle">(13 MFCC → 3D)</span>
+            </div>
+            <div id="manifold-container"></div>
+
+            <!-- MFCC Sidebar -->
+            <div id="mfcc-sidebar">
+              <!-- Tooltip area (top-right) -->
+              <div id="mfcc-tooltip">
+                <div class="tooltip-row">
+                  <span class="tooltip-label">COLOR/FREQUENCY</span>
+                  <span class="tooltip-value" id="tt-frequency">0.0000</span>
+                  <span class="tooltip-label">SIGNAL AMPLITUDE</span>
+                </div>
+                <div class="tooltip-marker-row">
+                  <div class="tooltip-marker" id="tt-marker"></div>
+                  <span class="tooltip-value" id="tt-amplitude">-92.5 dB</span>
+                </div>
+                <div class="tooltip-row spread-row">
+                  <div class="spread-item">
+                    <span class="tooltip-label">SPECTRAL SPREAD</span>
+                  </div>
+                  <div class="spread-item">
+                    <span class="tooltip-label">SPECTRAL CENTROID</span>
+                  </div>
+                </div>
+                <div class="tooltip-row">
+                  <span class="tooltip-label">EMISSION TIME</span>
+                </div>
+                <div class="emission-bar">
+                  <div class="emission-fill" id="emission-fill"></div>
+                </div>
+              </div>
+
+              <!-- MFCC Bars -->
+              <div id="mfcc-bars">
+                <div class="mfcc-bar"><span class="mfcc-label">MFCC01</span>
+                  <div class="bar-fill" id="mfcc-1"></div>
+                </div>
+                <div class="mfcc-bar"><span class="mfcc-label">MFCC02</span>
+                  <div class="bar-fill" id="mfcc-2"></div>
+                </div>
+                <div class="mfcc-bar"><span class="mfcc-label">MFCC03</span>
+                  <div class="bar-fill" id="mfcc-3"></div>
+                </div>
+                <div class="mfcc-bar"><span class="mfcc-label">MFCC04</span>
+                  <div class="bar-fill" id="mfcc-4"></div>
+                </div>
+                <div class="mfcc-bar"><span class="mfcc-label">MFCC05</span>
+                  <div class="bar-fill" id="mfcc-5"></div>
+                </div>
+                <div class="mfcc-bar"><span class="mfcc-label">MFCC06</span>
+                  <div class="bar-fill" id="mfcc-6"></div>
+                </div>
+                <div class="mfcc-bar"><span class="mfcc-label">MFCC07</span>
+                  <div class="bar-fill" id="mfcc-7"></div>
+                </div>
+                <div class="mfcc-bar"><span class="mfcc-label">MFCC08</span>
+                  <div class="bar-fill" id="mfcc-8"></div>
+                </div>
+                <div class="mfcc-bar"><span class="mfcc-label">MFCC09</span>
+                  <div class="bar-fill" id="mfcc-9"></div>
+                </div>
+                <div class="mfcc-bar"><span class="mfcc-label">MFCC10</span>
+                  <div class="bar-fill" id="mfcc-10"></div>
+                </div>
+                <div class="mfcc-bar"><span class="mfcc-label">MFCC11</span>
+                  <div class="bar-fill" id="mfcc-11"></div>
+                </div>
+                <div class="mfcc-bar"><span class="mfcc-label">MFCC12</span>
+                  <div class="bar-fill" id="mfcc-12"></div>
+                </div>
+                <div class="mfcc-bar"><span class="mfcc-label">MFCC13</span>
+                  <div class="bar-fill" id="mfcc-13"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Row (2 panels) -->
+          <div class="bottom-row">
+            <div class="panel resizable" id="tone-evolution-panel">
+              <div class="panel-header">
+                <span class="panel-title">TONE EVOLUTION MAP</span>
+                <!-- CEPSTRAL PEAK Color Legend -->
+                <div class="cepstral-legend">
+                  <span class="cepstral-title">CEPSTRAL PEAK</span>
+                  <div class="cepstral-gradient"></div>
+                </div>
+              </div>
+              <div id="tone-evolution-container"></div>
+              <div class="resize-handle resize-right"></div>
+            </div>
+
+            <div class="panel resizable" id="timbre-space-panel">
+              <div class="panel-header">
+                <span class="panel-title">TIMBRE SPACE</span>
+                <div class="timbre-legends">
+                  <span class="timbre-legend-item left">SPECTRAL SPREAD</span>
+                  <span class="timbre-legend-item right">SPECTRAL SLOPE</span>
+                </div>
+              </div>
+              <div id="timbre-space-container"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Video container (hidden) -->
+      <div id="video-container" class="hidden"></div>
+
+      <!-- Minimal Playback Controls (floating) -->
+      <footer id="controls">
+        <button id="play-btn" class="control-btn">
+          <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+          <svg class="pause-icon hidden" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 4h4v16H6zm8 0h4v16h-4z" />
+          </svg>
+        </button>
+        <div id="progress-container">
+          <div id="progress-bar">
+            <div id="progress-fill"></div>
+          </div>
+        </div>
+        <div id="time-display">
+          <span id="current-time">0:00</span>
+          <span>/</span>
+          <span id="duration">0:00</span>
+        </div>
+        <button id="new-file-btn" title="Load new file">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 4v16m-8-8h16" />
+          </svg>
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
