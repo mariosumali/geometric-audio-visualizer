@@ -38,7 +38,6 @@ class App {
     this.initDOMElements();
     this.initEventListeners();
     this.initVisualizers();
-    this.initResize();
 
     // Handle window resize
     window.addEventListener('resize', () => this.handleResize());
@@ -138,6 +137,49 @@ class App {
         this.togglePlayback();
       }
     });
+
+    // Manifold settings panel
+    const settingsBtn = document.getElementById('manifold-settings-btn');
+    const settingsPanel = document.getElementById('manifold-settings');
+
+    if (settingsBtn && settingsPanel) {
+      settingsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        settingsPanel.classList.toggle('hidden');
+      });
+
+      // Close settings when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!settingsPanel.contains(e.target) && e.target !== settingsBtn) {
+          settingsPanel.classList.add('hidden');
+        }
+      });
+
+      // Settings toggles
+      document.getElementById('toggle-glow')?.addEventListener('change', (e) => {
+        this.visualizers.manifold.toggleGlow(e.target.checked);
+      });
+
+      document.getElementById('toggle-lines')?.addEventListener('change', (e) => {
+        this.visualizers.manifold.toggleLines(e.target.checked);
+      });
+
+      document.getElementById('toggle-rotate')?.addEventListener('change', (e) => {
+        this.visualizers.manifold.toggleAutoRotate(e.target.checked);
+      });
+
+      document.getElementById('toggle-grid')?.addEventListener('change', (e) => {
+        this.visualizers.manifold.toggleGrid(e.target.checked);
+      });
+
+      document.getElementById('toggle-axes')?.addEventListener('change', (e) => {
+        this.visualizers.manifold.toggleAxes(e.target.checked);
+      });
+
+      document.getElementById('particle-size')?.addEventListener('input', (e) => {
+        this.visualizers.manifold.setParticleSize(e.target.value);
+      });
+    }
   }
 
   initVisualizers() {

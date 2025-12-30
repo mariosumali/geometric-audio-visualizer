@@ -70,7 +70,7 @@ export class Manifold3D {
 
         // Particle material with glow effect
         const particleMaterial = new THREE.PointsMaterial({
-            size: 0.4,
+            size: 0.15,
             vertexColors: true,
             blending: THREE.AdditiveBlending,
             transparent: true,
@@ -318,9 +318,11 @@ export class Manifold3D {
     }
 
     updateGlow() {
-        // Average recent positions
+        // Average recent positions to find centroid
         let avgX = 0, avgY = 0, avgZ = 0;
-        const sampleCount = Math.min(50, this.particleIndex);
+        const sampleCount = Math.min(100, this.particleIndex);
+
+        if (sampleCount === 0) return;
 
         for (let i = 0; i < sampleCount; i++) {
             const idx = ((this.particleIndex - 1 - i + this.maxParticles) % this.maxParticles) * 3;
@@ -329,16 +331,16 @@ export class Manifold3D {
             avgZ += this.positions[idx + 2];
         }
 
-        if (sampleCount > 0) {
-            const centerX = avgX / sampleCount;
-            const centerY = avgY / sampleCount;
-            const centerZ = avgZ / sampleCount;
+        const centerX = avgX / sampleCount;
+        const centerY = avgY / sampleCount;
+        const centerZ = avgZ / sampleCount;
 
-            this.glowSphere.position.set(centerX, centerY, centerZ);
-            if (this.outerGlow) {
-                this.outerGlow.position.set(centerX, centerY, centerZ);
-            }
+        // Update glow position to follow particle centroid
+        this.glowSphere.position.set(centerX, centerY, centerZ);
+        if (this.outerGlow) {
+            this.outerGlow.position.set(centerX, centerY, centerZ);
         }
+        // Camera rotates around origin (0,0,0)
     }
 
     render() {
@@ -359,5 +361,43 @@ export class Manifold3D {
         this.particleGeometry.attributes.color.needsUpdate = true;
         this.particleGeometry.attributes.size.needsUpdate = true;
         this.lineGeometry.attributes.position.needsUpdate = true;
+    }
+
+    // Toggle methods for settings
+    toggleGlow(visible) {
+        if (this.glowSphere) this.glowSphere.visible = visible;
+        if (this.outerGlow) this.outerGlow.visible = visible;
+    }
+
+    toggleLines(visible) {
+        if (this.lineMesh) this.lineMesh.visible = visible;
+    }
+
+    toggleAutoRotate(enabled) {
+        if (this.controls) this.controls.autoRotate = enabled;
+    }
+
+    toggleGrid(visible) {
+        // Find grid in scene
+        this.scene.children.forEach(child => {
+            if (child.type === 'GridHelper') {
+                child.visible = visible;
+            }
+        });
+    }
+
+    toggleAxes(visible) {
+        this.scene.children.forEach(child => {
+            if (child.type === 'Line' && child.userData && child.userData.isAxis) {
+                child.visible = visible;
+            }
+        });
+    }
+
+    setParticleSize(size) {
+        if (this.particles && this.particles.material) {
+            this.particles.material.size = parseFloat(size);
+            this.particles.material.needsUpdate = true;
+        }
     }
 }

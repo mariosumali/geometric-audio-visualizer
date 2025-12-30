@@ -63,9 +63,9 @@ export class PCA {
 
     /**
      * Transform a single sample using pre-computed projection
-     * @param {Float32Array} sample - Single feature vector
+     * @param {Float32Array} sample - Single feature vector (MFCCs typically range -40 to +40)
      * @param {number} numComponents - Number of output dimensions
-     * @returns {Float32Array} Transformed sample
+     * @returns {Float32Array} Transformed sample in range suitable for 3D visualization
      */
     transform(sample, numComponents = 3) {
         const numFeatures = sample.length;
@@ -77,8 +77,8 @@ export class PCA {
                 const weight = Math.sin((i + 1) * (j + 1) * 0.5) * 0.5 + 0.5;
                 output[i] += sample[j] * weight;
             }
-            // Normalize and scale
-            output[i] = (output[i] / numFeatures) * 10;
+            // Scale to wider visualization range for better spread
+            output[i] = (output[i] / numFeatures) * 1.5;
         }
 
         return output;
