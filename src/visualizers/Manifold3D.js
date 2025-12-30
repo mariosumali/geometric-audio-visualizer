@@ -182,21 +182,27 @@ export class Manifold3D {
             new THREE.Vector3(-axisLength, 0, 0),
             new THREE.Vector3(axisLength, 0, 0)
         ]);
-        this.scene.add(new THREE.Line(xGeom, axesMaterial));
+        const xAxis = new THREE.Line(xGeom, axesMaterial);
+        xAxis.userData.isAxis = true;
+        this.scene.add(xAxis);
 
         // Y axis
         const yGeom = new THREE.BufferGeometry().setFromPoints([
             new THREE.Vector3(0, -axisLength, 0),
             new THREE.Vector3(0, axisLength, 0)
         ]);
-        this.scene.add(new THREE.Line(yGeom, axesMaterial));
+        const yAxis = new THREE.Line(yGeom, axesMaterial);
+        yAxis.userData.isAxis = true;
+        this.scene.add(yAxis);
 
         // Z axis
         const zGeom = new THREE.BufferGeometry().setFromPoints([
             new THREE.Vector3(0, 0, -axisLength),
             new THREE.Vector3(0, 0, axisLength)
         ]);
-        this.scene.add(new THREE.Line(zGeom, axesMaterial));
+        const zAxis = new THREE.Line(zGeom, axesMaterial);
+        zAxis.userData.isAxis = true;
+        this.scene.add(zAxis);
 
         // Grid on XZ plane
         const gridSize = 20;
@@ -370,7 +376,7 @@ export class Manifold3D {
     }
 
     toggleLines(visible) {
-        if (this.lineMesh) this.lineMesh.visible = visible;
+        if (this.lines) this.lines.visible = visible;
     }
 
     toggleAutoRotate(enabled) {

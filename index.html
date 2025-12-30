@@ -73,35 +73,6 @@
             <div class="manifold-header">
               <span class="panel-title">SPATIOTEMPORAL ACOUSTIC MANIFOLD</span>
               <span class="panel-subtitle">(13 MFCC → 3D)</span>
-              <button class="settings-toggle" id="manifold-settings-btn" title="Settings">⚙</button>
-            </div>
-
-            <!-- Settings Panel -->
-            <div id="manifold-settings" class="settings-panel hidden">
-              <div class="setting-row">
-                <label for="toggle-glow">Centroid Glow</label>
-                <input type="checkbox" id="toggle-glow" checked>
-              </div>
-              <div class="setting-row">
-                <label for="toggle-lines">Connecting Lines</label>
-                <input type="checkbox" id="toggle-lines" checked>
-              </div>
-              <div class="setting-row">
-                <label for="toggle-rotate">Auto Rotate</label>
-                <input type="checkbox" id="toggle-rotate" checked>
-              </div>
-              <div class="setting-row">
-                <label for="toggle-grid">Show Grid</label>
-                <input type="checkbox" id="toggle-grid" checked>
-              </div>
-              <div class="setting-row">
-                <label for="toggle-axes">Show Axes</label>
-                <input type="checkbox" id="toggle-axes" checked>
-              </div>
-              <div class="setting-row">
-                <label for="particle-size">Particle Size</label>
-                <input type="range" id="particle-size" min="0.05" max="0.5" step="0.05" value="0.15">
-              </div>
             </div>
 
             <div id="manifold-container"></div>
@@ -174,6 +145,38 @@
                 </div>
                 <div class="mfcc-bar"><span class="mfcc-label">MFCC13</span>
                   <div class="bar-fill" id="mfcc-13"></div>
+                </div>
+              </div>
+
+              <!-- Settings Toggle -->
+              <button class="settings-toggle sidebar-settings" id="manifold-settings-btn" title="Settings">⚙
+                Settings</button>
+
+              <!-- Settings Panel -->
+              <div id="manifold-settings" class="settings-panel hidden">
+                <div class="setting-row">
+                  <label for="toggle-glow">Centroid Glow</label>
+                  <input type="checkbox" id="toggle-glow" checked>
+                </div>
+                <div class="setting-row">
+                  <label for="toggle-lines">Connecting Lines</label>
+                  <input type="checkbox" id="toggle-lines" checked>
+                </div>
+                <div class="setting-row">
+                  <label for="toggle-rotate">Auto Rotate</label>
+                  <input type="checkbox" id="toggle-rotate" checked>
+                </div>
+                <div class="setting-row">
+                  <label for="toggle-grid">Show Grid</label>
+                  <input type="checkbox" id="toggle-grid" checked>
+                </div>
+                <div class="setting-row">
+                  <label for="toggle-axes">Show Axes</label>
+                  <input type="checkbox" id="toggle-axes" checked>
+                </div>
+                <div class="setting-row">
+                  <label for="particle-size">Particle Size</label>
+                  <input type="range" id="particle-size" min="0.05" max="0.5" step="0.05" value="0.15">
                 </div>
               </div>
             </div>

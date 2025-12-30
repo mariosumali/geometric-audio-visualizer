@@ -282,22 +282,19 @@ body {
    ============================================ */
 
 .settings-toggle {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: var(--text-secondary);
-  font-size: 14px;
-  width: 28px;
-  height: 28px;
+  font-size: 10px;
+  padding: 6px 10px;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 4px;
+  font-family: var(--font-mono);
 }
 
 .settings-toggle:hover {
@@ -305,17 +302,17 @@ body {
   color: var(--text-primary);
 }
 
+.sidebar-settings {
+  width: 100%;
+  margin-top: 10px;
+}
+
 .settings-panel {
-  position: absolute;
-  top: 45px;
-  right: 10px;
   background: rgba(15, 15, 20, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 6px;
-  padding: 12px;
-  z-index: 100;
-  min-width: 180px;
-  backdrop-filter: blur(10px);
+  padding: 10px;
+  margin-top: 8px;
 }
 
 .settings-panel.hidden {
@@ -400,7 +397,7 @@ body {
   flex-direction: column;
   gap: 8px;
   z-index: 20;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 #mfcc-tooltip {
